@@ -1,6 +1,22 @@
+/**
+ * Copyright 2015 Javier Montero
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
 package main;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -62,6 +78,10 @@ public class Simulation {
 		System.out.println("Numero aterrizajes "+num_landed_airplanes+"\nNumero despegues "+num_takeoff_airplanes+
 				"\nNumero aviones guiados con coche "+num_guidance_airplanes + "\nNumero de aviones en terminal " + num_terminal_airplanes);
 	}
+	/**
+	 * Method to get the minimun of all the lists.
+	 * @return
+	 */
 	public int checkMinimunList(){
 		int minimunList = 1;
 		
@@ -101,12 +121,17 @@ public class Simulation {
 			waiting_planes_landing.add(waiting_planes_landing.size(), actual_time + r.nextInt(200));
 			
 			//Landed plane goes to guidance queue
-			waiting_planes_guidance.add(actual_time += 50);
+			waiting_planes_guidance.add(actual_time + r.nextInt(1));
+			Collections.sort(waiting_planes_landing);
+			Collections.sort(waiting_planes_guidance);
+
 			available_runways++;
 		}else{
-			System.out.println("Avion intentando aterrizar" + actual_time);
+			System.out.println(">>>>>Avion intentando aterrizar" + actual_time);
 			waiting_planes_landing.remove(0);
 			waiting_planes_landing.add(waiting_planes_landing.size(), actual_time + r.nextInt(10));
+			Collections.sort(waiting_planes_landing);
+
 		}
 	}
 	public void takeoff_process(){
@@ -127,11 +152,15 @@ public class Simulation {
 			waiting_planes_guidance.remove(0);
 			
 			//Plane guided goes to terminal
-			waiting_planes_terminal.add(actual_time + r.nextInt(75));
+			waiting_planes_terminal.add(actual_time + r.nextInt(750));
+			Collections.sort(waiting_planes_terminal);
+
+		}else{
+			System.out.println(">>>>>Avion esperando a que haya un coche libre que le guie");
 		}
 	}
 	public void terminal_process(){
-		
+		System.out.println(waiting_planes_takeoff + "-" + Constants.number_of_terminal);
 		if(waiting_planes_takeoff.size() < Constants.number_of_terminal){
 			
 			System.out.println("Avion yendo a Terminal " + actual_time);
@@ -140,7 +169,11 @@ public class Simulation {
 			waiting_planes_terminal.remove(0);
 			
 			//Plane in terminal goes to takeoff
-			waiting_planes_takeoff.add(actual_time + r.nextInt(30));
+			waiting_planes_takeoff.add(actual_time + r.nextInt(300));
+			Collections.sort(waiting_planes_takeoff);
+
+		}else{
+			System.out.println(">>>>>Avion esperando a que haya terminal libre");
 		}
 	}
 }
