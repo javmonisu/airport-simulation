@@ -62,6 +62,7 @@ public final class DistributionGenerator {
      * @throws IllegalArgumentException unless <tt>lambda > 0.0</tt> and not infinite
      */
     public static int poisson(double lambda) {
+    	//TODO Tal como esta ahora mismo no nos da en que momento nos llega el siguiente avión en minutos.
         if (!(lambda > 0.0))
             throw new IllegalArgumentException("Parameter lambda must be positive");
         if (Double.isInfinite(lambda))
