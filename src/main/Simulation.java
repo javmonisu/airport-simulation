@@ -54,7 +54,7 @@ public class Simulation {
 			busy_runways = new ArrayList<>();
 			
 			//We will say that one runway will be busy with the landed plane.
-			double POISSON_RATE = DistributionGenerator.getPoissonRate(actual_time);
+			//double POISSON_RATE = DistributionGenerator.getPoissonRate(actual_time);
 			
 			//TODO Next plane, pending to use PoissonRate
 			waiting_planes_landing.add(waiting_planes_landing.size(), r.nextInt(20) + 100);
@@ -124,16 +124,16 @@ public class Simulation {
 	public void landing_process(){
 		
 		if(busy_runways.size() < Constants.number_of_runways){
-			System.out.println("Avion aterrizado en el tiempo " + actual_time);
+			System.out.println("1. Avion aterrizado en el tiempo " + actual_time);
 			num_landed_airplanes++;
 
 			waiting_planes_landing.remove(0);
 			
 			//Next plane arrival
-			waiting_planes_landing.add(waiting_planes_landing.size(), actual_time + r.nextInt(200)+ 50);
+			waiting_planes_landing.add(waiting_planes_landing.size(), actual_time + r.nextInt(20)+ 50);
 			
 			//Landed plane goes to guidance queue
-			int timeUntilFreeRunway = actual_time + (int)DistributionGenerator.exponential(actual_time);
+			int timeUntilFreeRunway = actual_time + r.nextInt(10) + 5;
 			
 			//Guindance when the landed is complete.
 			waiting_planes_guidance.add(timeUntilFreeRunway);
@@ -153,8 +153,7 @@ public class Simulation {
 		if(busy_runways.size() < Constants.number_of_runways){
 			
 			//Plane ready to takeoff! Check how much time it will take
-			//TODO Exponential time.
-			int timeUntilFreeRunway = actual_time + 10 + r.nextInt(10);//actual_time + (int)DistributionGenerator.exponential(actual_time);
+			int timeUntilFreeRunway = (int) (actual_time + DistributionGenerator.uniform(10,15));
 			
 			for(int i = actual_time ; i < timeUntilFreeRunway; i++){
 				if(busy_runways.size() > 0 && busy_runways.get(actual_time) != null){
@@ -167,7 +166,7 @@ public class Simulation {
 			busy_runways.add(timeUntilFreeRunway);
 			Collections.sort(busy_runways);
 			
-			System.out.println("Avion despegado en el tiempo " + actual_time);
+			System.out.println("4. Avion despegado en el tiempo " + actual_time);
 			num_takeoff_airplanes++;
 			waiting_planes_takeoff.remove(0);
 		}else{
@@ -179,14 +178,14 @@ public class Simulation {
 	public void guidance_process(){
 		//Available cars?
 		if(waiting_planes_terminal.size() < Constants.number_of_cars ){
-			System.out.println("Avion guiado " + actual_time);
+			System.out.println("2. Avion guiado " + actual_time);
 			num_guidance_airplanes++;
 			waiting_planes_guidance.remove(0);
 			
 			//Plane guided goes to terminal
 			//TODO Delete +20
 			int time_spent = (int) DistributionGenerator.exponential(45) + 20;
-			waiting_planes_terminal.add(actual_time + time_spent + r.nextInt(30));
+			waiting_planes_terminal.add(actual_time + time_spent + r.nextInt(300));
 			Collections.sort(waiting_planes_terminal);
 
 		}else{
@@ -197,7 +196,7 @@ public class Simulation {
 	public void terminal_process(){
 		//Available terminals?
 		if(waiting_planes_takeoff.size() < Constants.number_of_terminal){
-			System.out.println("Avion yendo a Terminal " + actual_time);
+			System.out.println("3. Avion yendo a Terminal " + actual_time);
 			num_terminal_airplanes++;
 			waiting_planes_terminal.remove(0);
 			
