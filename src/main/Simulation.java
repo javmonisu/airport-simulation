@@ -37,7 +37,7 @@ public class Simulation {
 	
 	//Execution time
 	public int time = 43200;
-	public int actual_time = 1;
+	public int current_time = 1;
 	
 	//We don't use a Set because values can be repeated.
 	public List<Integer> waiting_planes_landing ,waiting_planes_takeoff,
@@ -54,18 +54,16 @@ public class Simulation {
 			busy_runways = new ArrayList<>();
 			
 			//We will say that one runway will be busy with the landed plane.
-			//double POISSON_RATE = DistributionGenerator.getPoissonRate(actual_time);
+			waiting_planes_landing.add(0, current_time + (int) DistributionGenerator.exponential(DistributionGenerator.getPoissonRate(current_time)));
+			busy_runways.add(waiting_planes_landing.get(0));
 			
-			//TODO Next plane, pending to use PoissonRate
-			waiting_planes_landing.add(waiting_planes_landing.size(), r.nextInt(20) + 100);
-
 			//While we have not run out of time...
 			while((waiting_planes_landing.size() > 0 && waiting_planes_landing.get(0) < time) ||
 					(waiting_planes_takeoff.size() > 0 && waiting_planes_takeoff.get(0) < time) ||
 					(waiting_planes_guidance.size() > 0 && waiting_planes_guidance.get(0) < time) ||
 					(waiting_planes_terminal.size() > 0 && waiting_planes_terminal.get(0) < time)){
 				
-				if(busy_runways.size() > 0 && busy_runways.get(0) >= actual_time){
+				if(busy_runways.size() > 0 && busy_runways.get(0) >= current_time){
 					busy_runways.remove(0);
 				}
 				int minimun_List = checkMinimunList();
@@ -84,8 +82,11 @@ public class Simulation {
 					break;
 				}
 			}
-			System.out.println("Numero aterrizajes "+num_landed_airplanes+"\nNumero despegues "+num_takeoff_airplanes+
-					"\nNumero aviones guiados con coche "+num_guidance_airplanes + "\nNumero de aviones en terminal " + num_terminal_airplanes);
+			System.out.println("-------------------------------------------\n"
+					         + "Numero aterrizajes "+num_landed_airplanes  
+					         + "\nNumero despegues "+num_takeoff_airplanes
+					         + "\nNumero aviones guiados con coche " + num_guidance_airplanes 
+					         + "\nNumero de aviones en terminal " + num_terminal_airplanes);
 		}catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());
 		}
@@ -117,24 +118,30 @@ public class Simulation {
 			minimun = minimun_terminal;
 			minimunList = 4;
 		}
-		actual_time = minimun;
+		current_time = minimun;
 		return minimunList;
 	}
 	
 	public void landing_process(){
 		
 		if(busy_runways.size() < Constants.number_of_runways){
-			System.out.println("1. Avion aterrizado en el tiempo " + actual_time);
+						
+			System.out.println("1. Avion aterrizado en el tiempo " + current_time);
 			num_landed_airplanes++;
 
 			waiting_planes_landing.remove(0);
 			
 			//Next plane arrival
-			waiting_planes_landing.add(waiting_planes_landing.size(), actual_time + r.nextInt(20)+ 50);
+			int distributionTime = (int) DistributionGenerator.exponential(DistributionGenerator.getPoissonRate(current_time));
+			System.out.println(distributionTime);
+			waiting_planes_landing.add(waiting_planes_landing.size(), current_time + distributionTime);
+			
+//			What if planes arrive every minute?
+//			waiting_planes_landing.add(waiting_planes_landing.size(), current_time + 1);
 			
 			//Landed plane goes to guidance queue
-			int timeUntilFreeRunway = actual_time + r.nextInt(10) + 5;
-			
+			int timeUntilFreeRunway = current_time + (int)DistributionGenerator.gaussian(10, 3);
+	
 			//Guindance when the landed is complete.
 			waiting_planes_guidance.add(timeUntilFreeRunway);
 			busy_runways.add(timeUntilFreeRunway);
@@ -143,8 +150,8 @@ public class Simulation {
 			Collections.sort(waiting_planes_guidance);
 
 		}else{
-			System.out.println(">>>>>Avion intentando aterrizar" + actual_time);
-			waiting_planes_landing.set(waiting_planes_landing.size(), actual_time + r.nextInt(10));
+			System.out.println(">>>>>Avion intentando aterrizar" + current_time);
+			waiting_planes_landing.set(waiting_planes_landing.size(), current_time + r.nextInt(10));
 			Collections.sort(waiting_planes_landing);
 
 		}
@@ -153,10 +160,10 @@ public class Simulation {
 		if(busy_runways.size() < Constants.number_of_runways){
 			
 			//Plane ready to takeoff! Check how much time it will take
-			int timeUntilFreeRunway = (int) (actual_time + DistributionGenerator.uniform(10,15));
+			int timeUntilFreeRunway = (int) (current_time + DistributionGenerator.uniform(10,15));
 			
-			for(int i = actual_time ; i < timeUntilFreeRunway; i++){
-				if(busy_runways.size() > 0 && busy_runways.get(actual_time) != null){
+			for(int i = current_time ; i < timeUntilFreeRunway; i++){
+				if(busy_runways.size() > 0 && busy_runways.get(current_time) != null){
 					System.out.println("La pista va a ser ocupada inminentemente");
 					waiting_planes_takeoff.set(0, waiting_planes_takeoff.get(0) + r.nextInt(100));
 					continue;
@@ -166,7 +173,7 @@ public class Simulation {
 			busy_runways.add(timeUntilFreeRunway);
 			Collections.sort(busy_runways);
 			
-			System.out.println("4. Avion despegado en el tiempo " + actual_time);
+			System.out.println("4. Avion despegado en el tiempo " + current_time);
 			num_takeoff_airplanes++;
 			waiting_planes_takeoff.remove(0);
 		}else{
@@ -178,14 +185,14 @@ public class Simulation {
 	public void guidance_process(){
 		//Available cars?
 		if(waiting_planes_terminal.size() < Constants.number_of_cars ){
-			System.out.println("2. Avion guiado " + actual_time);
+			System.out.println("2. Avion guiado " + current_time);
 			num_guidance_airplanes++;
 			waiting_planes_guidance.remove(0);
 			
 			//Plane guided goes to terminal
 			//TODO Delete +20
 			int time_spent = (int) DistributionGenerator.exponential(45) + 20;
-			waiting_planes_terminal.add(actual_time + time_spent + r.nextInt(300));
+			waiting_planes_terminal.add(current_time + time_spent + r.nextInt(300));
 			Collections.sort(waiting_planes_terminal);
 
 		}else{
@@ -196,12 +203,12 @@ public class Simulation {
 	public void terminal_process(){
 		//Available terminals?
 		if(waiting_planes_takeoff.size() < Constants.number_of_terminal){
-			System.out.println("3. Avion yendo a Terminal " + actual_time);
+			System.out.println("3. Avion yendo a Terminal " + current_time);
 			num_terminal_airplanes++;
 			waiting_planes_terminal.remove(0);
 			
 			//Plane in terminal goes to takeoff
-			waiting_planes_takeoff.add(actual_time + r.nextInt(50));
+			waiting_planes_takeoff.add(current_time + r.nextInt(50));
 			Collections.sort(waiting_planes_takeoff);
 		}else{
 			System.out.println(">>>>>Avion esperando a que haya terminal libre");

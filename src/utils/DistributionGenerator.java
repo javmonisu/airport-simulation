@@ -171,9 +171,9 @@ public final class DistributionGenerator {
 		
 		lambda = aviones/t_in_day;
 		
-		System.out.println("time in minutes in the day: "+t_in_day);
+//		System.out.println("time in minutes in the day: "+t_in_day);
 		
-		System.out.println("\n number of planes: "+aviones);
+//		System.out.println("\n number of planes: "+aviones);
 		
 		return lambda;
     }
