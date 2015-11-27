@@ -135,7 +135,6 @@ public final class DistributionGenerator {
      */
     public static double getPoissonRate(double t){
     	/* y = mx + n */
-    	double aviones = 0.0;
     	double lambda = 0.0;
     	
     	/* As "t" could be any minute in a month,
@@ -146,34 +145,30 @@ public final class DistributionGenerator {
     	
     	//section 1
     	if(h_in_day >= 0.0 && h_in_day <= 5.0){
-    		aviones = 2.0/5.0*h_in_day + 1.0;
+    		lambda = 2.0/5.0*h_in_day + 1.0;
     	}
     	
     	//section 2
 		if(h_in_day >= 5.0 && h_in_day <= 8.0){
-			aviones = -1.0/3.0*h_in_day + 14.0/3.0;
+			lambda = -1.0/3.0*h_in_day + 14.0/3.0;
 		}
 		
 		//section 3
 		if(h_in_day >= 8.0 && h_in_day <= 15.0){
-			aviones = 3.0/7.0*h_in_day - 10.0/7.0;
+			lambda = 3.0/7.0*h_in_day - 10.0/7.0;
 		}
 		
 		//section 4
 		if(h_in_day >= 15.0 && h_in_day <= 17.0){
-			aviones = -3.0/2.0*h_in_day + 55.0/2.0;
+			lambda = -3.0/2.0*h_in_day + 55.0/2.0;
     	}
 		
 		//section 5
 		if(h_in_day >= 17.0 && h_in_day <= 24.0){
-			aviones = -1.0/7.0*h_in_day + 31.0/7.0;
+			lambda = -1.0/7.0*h_in_day + 31.0/7.0;
     	}
 		
-		lambda = aviones/t_in_day;
-		
-//		System.out.println("time in minutes in the day: "+t_in_day);
-		
-//		System.out.println("\n number of planes: "+aviones);
+		System.out.println("\n LAMBDA: "+lambda);
 		
 		return lambda;
     }

@@ -132,9 +132,11 @@ public class Simulation {
 			waiting_planes_landing.remove(0);
 			
 			//Next plane arrival
-			int distributionTime = (int) DistributionGenerator.exponential(DistributionGenerator.getPoissonRate(current_time));
+			double distributionTime = DistributionGenerator.exponential(DistributionGenerator.getPoissonRate(current_time));
+			int distributionTimeInt = (int) distributionTime;
 			System.out.println(distributionTime);
-			waiting_planes_landing.add(waiting_planes_landing.size(), current_time + distributionTime);
+			System.out.println(distributionTimeInt);
+			waiting_planes_landing.add(waiting_planes_landing.size(), current_time + distributionTimeInt);
 			
 //			What if planes arrive every minute?
 //			waiting_planes_landing.add(waiting_planes_landing.size(), current_time + 1);
