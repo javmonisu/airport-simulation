@@ -17,6 +17,7 @@ package main;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -81,10 +82,17 @@ public class Simulation {
 					(waiting_planes_takeoff.size() > 0 && waiting_planes_takeoff.get(0) < time) ||
 					(waiting_planes_guidance.size() > 0 && waiting_planes_guidance.get(0) < time) ||
 					(waiting_planes_terminal.size() > 0 && waiting_planes_terminal.get(0) < time)){
-				
-				if(busy_runways.size() > 0 && busy_runways.get(0) >= current_time){
-					busy_runways.remove(0);
+				//We free the runways if the plane has stop using it.+`poi0   
+				Iterator<Double> it = busy_runways.iterator();
+
+				while(it.hasNext()){
+					System.out.println("Pista libre");
+					Double d = it.next();
+					if(d <= current_time){
+						it.remove();
+					}
 				}
+				
 				int minimun_List = checkMinimunList();
 				switch (minimun_List) {
 				case 1:
@@ -108,6 +116,7 @@ public class Simulation {
 					         + "\nNumero de aviones en terminal " + num_terminal_airplanes);
 		}catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());
+			e.printStackTrace();
 		}
 			
 	}		
@@ -170,7 +179,7 @@ public class Simulation {
 
 		}else{
 			System.out.println(">>>>>Avion intentando aterrizar" + current_time);
-			waiting_planes_landing.set(waiting_planes_landing.size(), current_time + r.nextInt(10));
+			waiting_planes_landing.set(waiting_planes_landing.size() -1, current_time + r.nextInt(10));
 			Collections.sort(waiting_planes_landing);
 			
 
