@@ -18,6 +18,19 @@ package main;
 public class InitializeSimulation {
 
 	public static void main(String[] args) {
-		new Simulation();
+//		int T = 43200;
+//		int nTerminal = 50;
+//		int nCars = 20;
+//		int nRunways = 3;
+		
+		int T = 100;
+		int nTerminal = 50;
+		int nCars = 25;
+		int nRunways = 4;
+		
+//		Simulation s = new Simulation();		
+		Simulation s = new Simulation(T, nTerminal, nCars, nRunways);
+
+		s.simulation();
 	}
 }

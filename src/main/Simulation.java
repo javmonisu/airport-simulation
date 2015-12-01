@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import utils.Constants;
 import utils.DistributionGenerator;
 
 /*
@@ -36,16 +35,36 @@ public class Simulation {
 	public int num_terminal_airplanes = 0;
 	
 	//Execution time
-	public double time = 43200;
+	public double time;
 	public double current_time = 1;
 	
+	//Numero de hangares
+	public int number_of_terminal;
+	//Numero de coches.
+	public int number_of_cars;
+	//Numero de pistas de aterrizaje.
+	public int number_of_runways;
+
 	//We don't use a Set because values can be repeated.
 	public List<Double> waiting_planes_landing ,waiting_planes_takeoff,
 	waiting_planes_guidance,waiting_planes_terminal,busy_runways;
 	
 	public double minimun;
 	
+	public Simulation(double T, int nTerminal, int nCars, int nRunways){
+		time = T;
+		number_of_terminal = nTerminal;
+		number_of_cars = nCars;
+		number_of_runways = nRunways;
+	}
 	public Simulation(){
+		time = 43200;
+		number_of_terminal = 50;
+		number_of_cars = 20;
+		number_of_runways = 3;
+	}
+	
+	public void simulation(){
 		try{
 			waiting_planes_landing = new ArrayList<>();
 			waiting_planes_takeoff = new ArrayList<>();
@@ -124,7 +143,7 @@ public class Simulation {
 	
 	public void landing_process(){
 		
-		if(busy_runways.size() < Constants.number_of_runways){
+		if(busy_runways.size() < number_of_runways){
 						
 			System.out.println("1. Avion aterrizado en el tiempo " + current_time);
 			num_landed_airplanes++;
@@ -158,7 +177,7 @@ public class Simulation {
 		}
 	}
 	public void takeoff_process(){
-		if(busy_runways.size() < Constants.number_of_runways){
+		if(busy_runways.size() < number_of_runways){
 			
 			//Plane ready to takeoff! Check how much time it will take
 			double timeUntilFreeRunway = (current_time + DistributionGenerator.uniform(10,15));
@@ -185,7 +204,7 @@ public class Simulation {
 	}
 	public void guidance_process(){
 		//Available cars?
-		if(waiting_planes_terminal.size() < Constants.number_of_cars ){
+		if(waiting_planes_terminal.size() < number_of_cars ){
 			System.out.println("2. Avion guiado " + current_time);
 			num_guidance_airplanes++;
 			waiting_planes_guidance.remove(0);
@@ -203,7 +222,7 @@ public class Simulation {
 	}
 	public void terminal_process(){
 		//Available terminals?
-		if(waiting_planes_takeoff.size() < Constants.number_of_terminal){
+		if(waiting_planes_takeoff.size() < number_of_terminal){
 			System.out.println("3. Avion yendo a Terminal " + current_time);
 			num_terminal_airplanes++;
 			waiting_planes_terminal.remove(0);
@@ -216,4 +235,5 @@ public class Simulation {
 			waiting_planes_terminal.set(0, waiting_planes_guidance.get(0) + 100);
 		}
 	}
+
 }
