@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 import utils.DistributionGenerator;
+import utils.Plane;
 
 /*
  * It is expected to launch more than one simulation at a time.
@@ -47,8 +48,8 @@ public class Simulation {
 	public int number_of_runways;
 
 	//We don't use a Set because values can be repeated.
-	public List<Double> waiting_planes_landing ,waiting_planes_takeoff,
-	waiting_planes_guidance,waiting_planes_terminal,busy_runways;
+	public List<Plane> waiting_planes_landing ,waiting_planes_takeoff,
+	waiting_planes_guidance,waiting_planes_terminal, busy_runways, planes_left;
 	
 	public double minimun;
 	
@@ -74,21 +75,23 @@ public class Simulation {
 			busy_runways = new ArrayList<>();
 			
 			//We will say that one runway will be busy with the landed plane.
-			waiting_planes_landing.add(0, current_time + DistributionGenerator.exponential(DistributionGenerator.getPoissonRate(current_time)));
+			Plane first_plane = new Plane(0.0);
+			first_plane.setLanding_time(current_time + DistributionGenerator.exponential(DistributionGenerator.getPoissonRate(current_time)));
+			waiting_planes_landing.add(0, first_plane);
 			busy_runways.add(waiting_planes_landing.get(0));
 			
 			//While we have not run out of time...
-			while((waiting_planes_landing.size() > 0 && waiting_planes_landing.get(0) < time) ||
-					(waiting_planes_takeoff.size() > 0 && waiting_planes_takeoff.get(0) < time) ||
-					(waiting_planes_guidance.size() > 0 && waiting_planes_guidance.get(0) < time) ||
-					(waiting_planes_terminal.size() > 0 && waiting_planes_terminal.get(0) < time)){
+			while((waiting_planes_landing.size() > 0 && waiting_planes_landing.get(0).getLanding_time() < time) ||
+					(waiting_planes_takeoff.size() > 0 && waiting_planes_takeoff.get(0).getTakeoff_time() < time) ||
+					(waiting_planes_guidance.size() > 0 && waiting_planes_guidance.get(0).getGuidance_time() < time) ||
+					(waiting_planes_terminal.size() > 0 && waiting_planes_terminal.get(0).getTerminal_time() < time)){
 				//We free the runways if the plane has stop using it.+`poi0   
-				Iterator<Double> it = busy_runways.iterator();
+				Iterator<Plane> it = busy_runways.iterator();
 
 				while(it.hasNext()){
 					System.out.println("Pista libre");
-					Double d = it.next();
-					if(d <= current_time){
+					Plane p = it.next();
+					if(p.getLanding_time() <= current_time){
 						it.remove();
 					}
 				}
@@ -128,10 +131,10 @@ public class Simulation {
 		int minimunList = 1;
 		
 		//Get minimum available, if the list is empty we set a very high value;
-		double  minimun_landing = waiting_planes_landing.size() > 0 ? waiting_planes_landing.get(0) : time + 1.0;
-		double minimun_takeoff = waiting_planes_takeoff.size() > 0 ? waiting_planes_takeoff.get(0) : time + 1.0;
-		double minimun_guidance = waiting_planes_guidance.size() > 0 ? waiting_planes_guidance.get(0): time + 1.0;
-		double minimun_terminal = waiting_planes_terminal.size() > 0 ? waiting_planes_terminal.get(0): time + 1.0;
+		double  minimun_landing = waiting_planes_landing.size() > 0 ? waiting_planes_landing.get(0).getLanding_time() : time + 1.0;
+		double minimun_takeoff = waiting_planes_takeoff.size() > 0 ? waiting_planes_takeoff.get(0).getTakeoff_time() : time + 1.0;
+		double minimun_guidance = waiting_planes_guidance.size() > 0 ? waiting_planes_guidance.get(0).getGuidance_time(): time + 1.0;
+		double minimun_terminal = waiting_planes_terminal.size() > 0 ? waiting_planes_terminal.get(0).getTerminal_time(): time + 1.0;
 		
 		minimun = minimun_landing;
 		if(minimun_takeoff < minimun){
@@ -156,30 +159,34 @@ public class Simulation {
 						
 			System.out.println("1. Avion aterrizado en el tiempo " + current_time);
 			num_landed_airplanes++;
-
+			
+			Plane landing_plane = waiting_planes_landing.get(0);
 			waiting_planes_landing.remove(0);
 			
 			//Next plane arrival
 			double distributionTime = DistributionGenerator.exponential(DistributionGenerator.getPoissonRate(current_time));
-			
-			waiting_planes_landing.add(waiting_planes_landing.size(), current_time + distributionTime);
+			Plane next_plane = new Plane(current_time);
+			next_plane.setLanding_time(current_time + distributionTime);
+			waiting_planes_landing.add(waiting_planes_landing.size(), next_plane);
 			
 //			What if planes arrive every minute?
 //			waiting_planes_landing.add(waiting_planes_landing.size(), current_time + 1);
 			
 			//Landed plane goes to guidance queue
 			double timeUntilFreeRunway = current_time + DistributionGenerator.gaussian(10, 3);
+			landing_plane.setGuidance_time(timeUntilFreeRunway);
 	
 			//Guindance when the landed is complete.
-			waiting_planes_guidance.add(timeUntilFreeRunway);
-			busy_runways.add(timeUntilFreeRunway);
+			waiting_planes_guidance.add(landing_plane);
+			busy_runways.add(landing_plane);
 			
 			Collections.sort(waiting_planes_landing);
 			Collections.sort(waiting_planes_guidance);
 
 		}else{
 			System.out.println(">>>>>Avion intentando aterrizar" + current_time);
-			waiting_planes_landing.set(waiting_planes_landing.size() -1, current_time + r.nextInt(10));
+			Plane not_landed_plane = waiting_planes_landing.get(waiting_planes_landing.size()-1);
+			not_landed_plane.setLanding_time(current_time + r.nextInt(10));
 			Collections.sort(waiting_planes_landing);
 			
 
@@ -194,21 +201,25 @@ public class Simulation {
 			for(double i = current_time ; i < timeUntilFreeRunway; i++){
 				if(busy_runways.size() > 0 && busy_runways.contains(douCurrentTime)){
 					System.out.println("La pista va a ser ocupada inminentemente");
-					waiting_planes_takeoff.set(0, waiting_planes_takeoff.get(0) + r.nextInt(100));
+					Plane taking_off_plane = waiting_planes_takeoff.get(0);
+					taking_off_plane.setTakeoff_time(taking_off_plane.getTakeoff_time() + r.nextInt(100));
 					continue;
 				}
 			}
 			
-			busy_runways.add(timeUntilFreeRunway);
+			Plane leaving_plane = waiting_planes_takeoff.get(0);
+			leaving_plane.setLeft_time(timeUntilFreeRunway);
 			Collections.sort(busy_runways);
 			
 			System.out.println("4. Avion despegado en el tiempo " + current_time);
 			num_takeoff_airplanes++;
 			waiting_planes_takeoff.remove(0);
+			planes_left.add(leaving_plane);
 		}else{
 			//Takeoff delayed
 			System.out.println("No hay pistas disponibles, retrasamos la salida del avion");
-			waiting_planes_takeoff.set(0, waiting_planes_takeoff.get(0) + r.nextInt(100));
+			Plane not_takingoff_plane = waiting_planes_takeoff.get(0);
+			not_takingoff_plane.setTakeoff_time(not_takingoff_plane.getTakeoff_time() + r.nextInt(100));
 		}
 	}
 	public void guidance_process(){
@@ -216,17 +227,22 @@ public class Simulation {
 		if(waiting_planes_terminal.size() < number_of_cars ){
 			System.out.println("2. Avion guiado " + current_time);
 			num_guidance_airplanes++;
+			
+			Plane guided_plane = waiting_planes_guidance.get(0);	
 			waiting_planes_guidance.remove(0);
 			
 			//Plane guided goes to terminal
 			//TODO Delete +20
 			double time_spent = DistributionGenerator.exponential(45) + 20;
-			waiting_planes_terminal.add(current_time + time_spent + r.nextInt(300));
+			double terminal_time = current_time + time_spent + r.nextInt(300);
+			guided_plane.setTerminal_time(terminal_time);
+			waiting_planes_terminal.add(guided_plane);
 			Collections.sort(waiting_planes_terminal);
 
 		}else{
 			System.out.println(">>>>>Avion esperando a que haya un coche libre que le guie");
-			waiting_planes_guidance.set(0, waiting_planes_guidance.get(0) + 100);
+			Plane not_guided_plane = waiting_planes_landing.get(0);
+			not_guided_plane.setLanding_time(not_guided_plane.getLanding_time() + 100);
 		}
 	}
 	public void terminal_process(){
@@ -234,14 +250,17 @@ public class Simulation {
 		if(waiting_planes_takeoff.size() < number_of_terminal){
 			System.out.println("3. Avion yendo a Terminal " + current_time);
 			num_terminal_airplanes++;
+			Plane terminal_plane = waiting_planes_terminal.get(0);
 			waiting_planes_terminal.remove(0);
 			
 			//Plane in terminal goes to takeoff
-			waiting_planes_takeoff.add(current_time + r.nextDouble());
+			terminal_plane.setTerminal_time(current_time + r.nextDouble());
+			waiting_planes_takeoff.add(terminal_plane);
 			Collections.sort(waiting_planes_takeoff);
 		}else{
 			System.out.println(">>>>>Avion esperando a que haya terminal libre");
-			waiting_planes_terminal.set(0, waiting_planes_guidance.get(0) + 100);
+			Plane not_terminal_plane = waiting_planes_terminal.get(0);
+			not_terminal_plane.setGuidance_time(not_terminal_plane.getGuidance_time() + 100);
 		}
 	}
 
