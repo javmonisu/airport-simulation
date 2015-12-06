@@ -1,5 +1,5 @@
 /**
- * Copyright 2015 Javier Montero,Diego Martin
+ * Copyright 2015 Javier Montero,Diego Martin, Javier Rabanillo
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -18,17 +18,13 @@ package main;
 public class InitializeSimulation {
 
 	public static void main(String[] args) {
-//		int T = 43200;
-//		int nTerminal = 50;
-//		int nCars = 20;
-//		int nRunways = 3;
-		
-		int T = 100;
+
+        //Caso inicial
+        int T = 43200;
 		int nTerminal = 50;
-		int nCars = 25;
-		int nRunways = 4;
-		
-//		Simulation s = new Simulation();		
+		int nCars = 20;
+		int nRunways = 3;
+
 		Simulation s = new Simulation(T, nTerminal, nCars, nRunways);
 
 		s.simulation();

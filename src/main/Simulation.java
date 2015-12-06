@@ -51,7 +51,9 @@ public class Simulation {
 	waiting_planes_guidance,waiting_planes_terminal,busy_runways;
 	
 	public double minimun;
-	
+
+	//Num of failed processes.
+    public int failed_landing = 0 , failed_takeoff = 0, failed_guidance = 0 , failed_terminal = 0;
 	public Simulation(double T, int nTerminal, int nCars, int nRunways){
 		time = T;
 		number_of_terminal = nTerminal;
@@ -113,16 +115,20 @@ public class Simulation {
 					         + "Numero aterrizajes "+num_landed_airplanes  
 					         + "\nNumero despegues "+num_takeoff_airplanes
 					         + "\nNumero aviones guiados con coche " + num_guidance_airplanes 
-					         + "\nNumero de aviones en terminal " + num_terminal_airplanes);
+					         + "\nNumero de aviones en terminal " + num_terminal_airplanes
+                             + "\n--------------------------------------------------"
+                             + "\nNumero de aviones que fallaron al aterrizar " +failed_landing
+                             + "\nNumero de aviones que fallaron al despegar " +failed_takeoff
+                             + "\nNumero de aviones que fallaron al ser guiados " +failed_guidance
+                             + "\nNumero de aviones que fallaron al ser llevados al terminal " +failed_terminal);
 		}catch (Exception e) {
 			System.out.println("Exception: " + e.getMessage());
 			e.printStackTrace();
 		}
-			
-	}		
+	}
+
 	/**
 	 * Method to get the minimun of all the lists.
-	 * @return
 	 */
 	public int checkMinimunList(){
 		int minimunList = 1;
@@ -181,8 +187,7 @@ public class Simulation {
 			System.out.println(">>>>>Avion intentando aterrizar" + current_time);
 			waiting_planes_landing.set(waiting_planes_landing.size() -1, current_time + r.nextInt(10));
 			Collections.sort(waiting_planes_landing);
-			
-
+            failed_landing++;
 		}
 	}
 	public void takeoff_process(){
@@ -190,12 +195,11 @@ public class Simulation {
 			
 			//Plane ready to takeoff! Check how much time it will take
 			double timeUntilFreeRunway = (current_time + DistributionGenerator.uniform(10,15));
-			Double douCurrentTime = new Double(current_time);
-			for(double i = current_time ; i < timeUntilFreeRunway; i++){
+			Double douCurrentTime = current_time;
+            for(double i = current_time ; i < timeUntilFreeRunway; i++){
 				if(busy_runways.size() > 0 && busy_runways.contains(douCurrentTime)){
 					System.out.println("La pista va a ser ocupada inminentemente");
 					waiting_planes_takeoff.set(0, waiting_planes_takeoff.get(0) + r.nextInt(100));
-					continue;
 				}
 			}
 			
@@ -209,6 +213,7 @@ public class Simulation {
 			//Takeoff delayed
 			System.out.println("No hay pistas disponibles, retrasamos la salida del avion");
 			waiting_planes_takeoff.set(0, waiting_planes_takeoff.get(0) + r.nextInt(100));
+            failed_takeoff++;
 		}
 	}
 	public void guidance_process(){
@@ -227,6 +232,7 @@ public class Simulation {
 		}else{
 			System.out.println(">>>>>Avion esperando a que haya un coche libre que le guie");
 			waiting_planes_guidance.set(0, waiting_planes_guidance.get(0) + 100);
+            failed_guidance++;
 		}
 	}
 	public void terminal_process(){
@@ -239,10 +245,10 @@ public class Simulation {
 			//Plane in terminal goes to takeoff
 			waiting_planes_takeoff.add(current_time + r.nextDouble());
 			Collections.sort(waiting_planes_takeoff);
-		}else{
+        }else{
 			System.out.println(">>>>>Avion esperando a que haya terminal libre");
 			waiting_planes_terminal.set(0, waiting_planes_guidance.get(0) + 100);
+            failed_terminal++;
 		}
 	}
-
 }
