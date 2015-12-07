@@ -50,7 +50,7 @@ public class Simulation {
 	public List<Double> waiting_planes_landing ,waiting_planes_takeoff,
 	waiting_planes_guidance,waiting_planes_terminal,busy_runways;
 	
-	public double minimun;
+	public double minimum;
 
 	//Num of failed processes.
     public int failed_landing = 0 , failed_takeoff = 0, failed_guidance = 0 , failed_terminal = 0;
@@ -61,10 +61,7 @@ public class Simulation {
 		number_of_runways = nRunways;
 	}
 	public Simulation(){
-		time = 43200;
-		number_of_terminal = 50;
-		number_of_cars = 20;
-		number_of_runways = 3;
+
 	}
 	
 	public void simulation(){
@@ -95,8 +92,8 @@ public class Simulation {
 					}
 				}
 				
-				int minimun_List = checkMinimunList();
-				switch (minimun_List) {
+				int minimum_List = checkMinimumList();
+				switch (minimum_List) {
 				case 1:
 					landing_process();
 					break;
@@ -128,32 +125,32 @@ public class Simulation {
 	}
 
 	/**
-	 * Method to get the minimun of all the lists.
+	 * Method to get the minimum of all the lists.
 	 */
-	public int checkMinimunList(){
-		int minimunList = 1;
+	public int checkMinimumList(){
+		int minimumList = 1;
 		
 		//Get minimum available, if the list is empty we set a very high value;
-		double  minimun_landing = waiting_planes_landing.size() > 0 ? waiting_planes_landing.get(0) : time + 1.0;
-		double minimun_takeoff = waiting_planes_takeoff.size() > 0 ? waiting_planes_takeoff.get(0) : time + 1.0;
-		double minimun_guidance = waiting_planes_guidance.size() > 0 ? waiting_planes_guidance.get(0): time + 1.0;
-		double minimun_terminal = waiting_planes_terminal.size() > 0 ? waiting_planes_terminal.get(0): time + 1.0;
+		double minimum_landing = waiting_planes_landing.size() > 0 ? waiting_planes_landing.get(0) : time + 1.0;
+		double minimum_takeoff = waiting_planes_takeoff.size() > 0 ? waiting_planes_takeoff.get(0) : time + 1.0;
+		double minimum_guidance = waiting_planes_guidance.size() > 0 ? waiting_planes_guidance.get(0): time + 1.0;
+		double minimum_terminal = waiting_planes_terminal.size() > 0 ? waiting_planes_terminal.get(0): time + 1.0;
 		
-		minimun = minimun_landing;
-		if(minimun_takeoff < minimun){
-			minimun = minimun_takeoff;
-			minimunList = 2;
+		minimum = minimum_landing;
+		if(minimum_takeoff < minimum){
+			minimum = minimum_takeoff;
+			minimumList = 2;
 		}
-		if(minimun_guidance < minimun){
-			minimun = minimun_guidance;
-			minimunList = 3;
+		if(minimum_guidance < minimum){
+			minimum = minimum_guidance;
+			minimumList = 3;
 		}
-		if(minimun_terminal < minimun){
-			minimun = minimun_terminal;
-			minimunList = 4;
+		if(minimum_terminal < minimum){
+			minimum = minimum_terminal;
+			minimumList = 4;
 		}
-		current_time = minimun;
-		return minimunList;
+		current_time = minimum;
+		return minimumList;
 	}
 	
 	public void landing_process(){
