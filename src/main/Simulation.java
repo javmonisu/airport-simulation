@@ -195,7 +195,7 @@ public class Simulation {
 			Double douCurrentTime = current_time;
             for(double i = current_time ; i < timeUntilFreeRunway; i++){
 				if(busy_runways.size() > 0 && busy_runways.contains(douCurrentTime)){
-					System.out.println("La pista va a ser ocupada inminentemente");
+					System.out.println("La pista va a ser ocupada inminentemente, se retrasa este aterrizaje");
 					waiting_planes_takeoff.set(0, waiting_planes_takeoff.get(0) + r.nextInt(100));
 				}
 			}
@@ -221,9 +221,8 @@ public class Simulation {
 			waiting_planes_guidance.remove(0);
 			
 			//Plane guided goes to terminal
-			//TODO Delete +20
-			double time_spent = DistributionGenerator.exponential(45) + 20;
-			waiting_planes_terminal.add(current_time + time_spent + r.nextInt(300));
+			double time_spent = DistributionGenerator.exponential(45);
+			waiting_planes_terminal.add(current_time + time_spent);
 			Collections.sort(waiting_planes_terminal);
 
 		}else{
